@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//音符类型Hold
 public class HoldScript : MonoBehaviour
 {
     SpriteRenderer mySprite;
 
-    bool add = true, remove = true, holding = false;
-    float myTime = -1, holdTime, holdingTime = 0, hitTime;
+    bool addFlag = true, removeFlag = true, holdingFlag = false;
+    float nowTime = -1 / DataTransfer.speedScale, holdTime, holdingTime = 0, hitTime;
 
     private void OnEnable()
     {
@@ -19,17 +20,17 @@ public class HoldScript : MonoBehaviour
 
     void Update()
     {
-        myTime += DataTransfer.myDeltaTime;
-        transform.Translate(0, 0, -15 * DataTransfer.myDeltaTime);
-        if (add && myTime > -0.06f)
+        nowTime += DataTransfer.myDeltaTime;
+        transform.Translate(0, 0, -15 * DataTransfer.myDeltaTime * DataTransfer.speedScale);
+        if (addFlag && nowTime > -0.08f)
         {
-            DataTransfer.holdHeadJudge.Add(this);
-            add = false;
+            DataTransfer.holdHeadJudge.Add(this);//加入判定列表
+            addFlag = false;
         }
-        else if (remove && myTime > 0.06f)
+        else if (removeFlag && nowTime > 0.08f)
         {
-            DataTransfer.holdHeadJudge.Remove(this);
-            remove = false;
+            DataTransfer.holdHeadJudge.Remove(this);//移出判定列表
+            removeFlag = false;
             Miss();
         }
     }
@@ -37,13 +38,13 @@ public class HoldScript : MonoBehaviour
     public bool HeadJudge(float hitPosition)
     {
         float x = System.Math.Abs(transform.position.x - hitPosition);
-        if (x < 1)
+        if (x < 1)//按到
         {
-            remove = false;
+            removeFlag = false;
             DataTransfer.holdHeadJudge.Remove(this);
             DataTransfer.holdingJudgeList.Add(this);
-            holding = true;
-            hitTime = myTime;
+            holdingFlag = true;
+            hitTime = nowTime;
             StartCoroutine("HoldingTimer");
             return true;
         }
@@ -55,7 +56,7 @@ public class HoldScript : MonoBehaviour
         float x = System.Math.Abs(transform.position.x - hitPosition);
         if(x < 1)
         {
-            holding = true;
+            holdingFlag = true;
             return true;
         }
         return false;
@@ -64,7 +65,7 @@ public class HoldScript : MonoBehaviour
     IEnumerator HoldingTimer()
     {
         float cd = 0.31f;
-        while (holding)
+        while (holdingFlag)
         {
             holdingTime += DataTransfer.myDeltaTime;           
             if(cd > 0.3f)
@@ -73,9 +74,9 @@ public class HoldScript : MonoBehaviour
                 cd -= 0.3f;
             }
             cd += Time.deltaTime;
-            holding = false;
-            transform.localScale = new Vector3(1, 1, 7.5f * (holdTime - holdingTime));
-            transform.Translate(0, 0, 7.5f * DataTransfer.myDeltaTime);
+            holdingFlag = false;
+            transform.localScale = new Vector3(1, 1, 7.5f * (holdTime - holdingTime) / DataTransfer.speedScale);
+            transform.Translate(0, 0, 7.5f * DataTransfer.myDeltaTime * DataTransfer.speedScale);
             if(holdingTime > holdTime)
             {
                 DataTransfer.holdingJudgeList.Remove(this);
