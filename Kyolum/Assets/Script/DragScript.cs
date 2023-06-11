@@ -2,36 +2,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//音符类型Drag
 public class DragScript : MonoBehaviour
 {
-    bool add = true, remove = true;
-    float myTime = -1;
+    bool addFlag = true, removeFlag = true;
+    float nowTime = -1 / DataTransfer.speedScale;
 
     void Update()
     {
-        myTime += DataTransfer.myDeltaTime;
-        transform.Translate(0, 0, -15 * DataTransfer.myDeltaTime);
-        if (add && myTime > -0.03f)
+        nowTime += DataTransfer.myDeltaTime;
+        transform.Translate(0, 0, -15 * DataTransfer.myDeltaTime * DataTransfer.speedScale);
+        if (addFlag && nowTime > -0.08f)
         {
-            DataTransfer.dragJudgeList.Add(this);
-            add = false;
+            DataTransfer.dragJudgeList.Add(this);//加入判定列表
+            addFlag = false;
         }
-        else if (remove && myTime > 0.03f)
+        else if (removeFlag && nowTime > 0.08f)
         {
-            DataTransfer.dragJudgeList.Remove(this);
-            remove = false;
+            DataTransfer.dragJudgeList.Remove(this);//移出判定列表
+            removeFlag = false;
             Miss();
         }
     }
 
-    public bool JudgeFunction(float hitPosition)
+    public bool Judge(float hitPosition)
     {
         float x = System.Math.Abs(transform.position.x - hitPosition);
         if (x < 1)
         {
             DataTransfer.dragJudgeList.Remove(this);
-            DataTransfer.controller.JudgeNote(myTime);
-            DataTransfer.controller.GenerateEffect(myTime, transform.position.x);
+            DataTransfer.controller.JudgeNote(nowTime);
+            DataTransfer.controller.GenerateEffect(nowTime, transform.position.x);
             Destroy(gameObject);
             return true;
         }
