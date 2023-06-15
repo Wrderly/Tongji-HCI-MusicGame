@@ -11,11 +11,12 @@ public class GameController : MonoBehaviour
     public TextAsset chart;
     public GameObject tap, flick, drag, hold;
     public GameObject perfectEffect, greatEffect;
+    //public GameObject transit;
     public Text score, hitCount, endScore, perfectHitCount, goodHitCount, missHitCount;
     public Button pause, continueGame, quit, endQuit;
     public GameObject pauseBackGround, gameEndBackground, promptLine;
 
-    float myTime = -1;//初始计时 为了使音符经过1秒下落后正好到达判定
+    float myTime = -2 + 1 / DataTransfer.speedScale;//初始计时 为了使音符经过指定秒下落后正好到达判定
 
     float[] timeStamps;//记录音符判定触发时间
     int[] noteQuatity;//记录音符数量
@@ -47,14 +48,14 @@ public class GameController : MonoBehaviour
         if (isPlaying)//正在游戏
         {
             myTime += Time.deltaTime;//增加计时器
-            DataTransfer.myDeltaTime = Time.deltaTime;//记一帧时间
+            DataTransfer.deltaTime = Time.deltaTime;//记一帧时间
         }
-        if (gameStart && !musicPlayer.isPlaying)//游戏已开始且英语结束
+        if (gameStart && !musicPlayer.isPlaying)//游戏已开始且音乐结束
         {
             StartCoroutine("GameEnd");
         }
         //生成音符
-        if (myTime > timeStamps[index])//达到生成音符的时间
+        if (index < timeStamps.Length && myTime > timeStamps[index])//达到生成音符的时间
         {
             for(int i = 0; i < noteQuatity[index]; i++)//遍历音符数量
             {
@@ -83,8 +84,8 @@ public class GameController : MonoBehaviour
                             break;
                         }
                 }
-                noteType.RemoveAt(0);//移除以判断数据
-                notePosition.RemoveAt(0);//移除以判断数据
+                noteType.RemoveAt(0);//移除已判断数据
+                notePosition.RemoveAt(0);//移除已判断数据
             }
             index++;
         }
@@ -112,9 +113,9 @@ public class GameController : MonoBehaviour
         for (int i = 0; i < everyLine.Length; i++)
         {
             string[] everyPart = everyLine[i].Split(';');//对于每一行 分割音符
-            string[] timePart = everyPart[0].Split(',');//对于音符 分割出触发时间与位置
+            string[] timePart = everyPart[0].Split(',');//对于音符 分割出触发时间与数量
             timeStamps[i] = Convert.ToSingle(timePart[0]);//保存时间
-            noteQuatity[i] = Convert.ToInt32(timePart[1]);//保存位置
+            noteQuatity[i] = Convert.ToInt32(timePart[1]);//保存数量
             string[] notePart = everyPart[1].Split(' ');//取音符的描述
             for(int n = 0; n < notePart.Length; n++)
             {
@@ -135,22 +136,26 @@ public class GameController : MonoBehaviour
         totalScore = 2 * noteType.Count;
     }
 
-    public void JudgeNote(float hitTime)
+    public void JudgeScore(float hitTime, int type)
     {
         hitTime = Math.Abs(hitTime);
-        if(hitTime < 0.03f)
+        if (type == 3 || type == 2)
         {
             nowScore += 2;
             perfectHit++;
-            //promptLine.
-            //ShakeScript.Shake();
-            //shake.Shake();
         }
         else
         {
-            nowScore++;
-            goodHit++;
-            //shake.Shake();
+            if (hitTime <= 0.08f)
+            {
+                nowScore += 2;
+                perfectHit++;
+            }
+            else
+            {
+                nowScore++;
+                goodHit++;
+            }
         }
         int s = Convert.ToInt32(1000000 * (nowScore / totalScore));
         score.text = s.ToString();
@@ -172,24 +177,30 @@ public class GameController : MonoBehaviour
     public void GenerateEffect(float hitTime, float xPosition)
     {
         //显示触发特效 按触发评分设置不同特效
-        if (Math.Abs(hitTime) < 0.03f)
+        if (Math.Abs(hitTime) <= 0.08f)
         {
             Instantiate(perfectEffect, new Vector3(xPosition, 0, 0), Quaternion.identity);
         }
-        else if(hitTime > 0.03f)
+        else if(hitTime > 0.08f)
         {
             Instantiate(greatEffect, new Vector3(xPosition, 0, -0.2f), Quaternion.identity);
         }
-        else if(hitTime < -0.03f)
+        else if(hitTime < -0.08f)
         {
             Instantiate(greatEffect, new Vector3(xPosition, 0, 0.3f), Quaternion.identity);
         }
     }
 
+    public void GeneratePerfectEffect(float xPosition)
+    {
+        //黄条恒定为perfect
+        Instantiate(perfectEffect, new Vector3(xPosition, 0, 0), Quaternion.identity);
+    }
+
     public void GenerateHoldingEffect(float hitTime, float xPosition)
     {
         hitTime = Math.Abs(hitTime);
-        if(hitTime < 0.03f)
+        if(hitTime <= 0.08f)
         {
             Instantiate(perfectEffect, new Vector3(xPosition, 0, 0), Quaternion.identity);
         }
@@ -206,7 +217,7 @@ public class GameController : MonoBehaviour
         musicPlayer.Pause();
         pause.gameObject.SetActive(false);
         pauseBackGround.SetActive(true);
-        DataTransfer.myDeltaTime = 0;
+        DataTransfer.deltaTime = 0;
     }
 
     void ContinueGame()
@@ -230,11 +241,12 @@ public class GameController : MonoBehaviour
         perfectHitCount.text = perfectHit.ToString();
         goodHitCount.text = goodHit.ToString();
         missHitCount.text = missHit.ToString();
-        DataTransfer.myDeltaTime = 0;
+        DataTransfer.deltaTime = 0;
     }
 
     void QuitGame()
     {
+        DataTransfer.transitAble = false;
         SceneManager.LoadScene(0);
     }
 }

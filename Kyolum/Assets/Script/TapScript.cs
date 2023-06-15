@@ -10,14 +10,14 @@ public class TapScript : MonoBehaviour
 
     void Update()
     {
-        nowTime += DataTransfer.myDeltaTime;
-        transform.Translate(0, 0, -15 * DataTransfer.myDeltaTime * DataTransfer.speedScale);
-        if (addFlag && nowTime > -0.08f)
+        nowTime += DataTransfer.deltaTime;
+        transform.Translate(0, 0, -15 * DataTransfer.deltaTime * DataTransfer.speedScale);
+        if (addFlag && nowTime > -0.12f)
         {
             DataTransfer.tapJudgeList.Add(this);//加入判定列表
             addFlag = false;
         }
-        else if (removeFlag && nowTime > 0.08f)
+        else if (removeFlag && nowTime > 0.12f)
         {
             DataTransfer.tapJudgeList.Remove(this);//移出判定列表
             removeFlag = false;
@@ -31,8 +31,8 @@ public class TapScript : MonoBehaviour
         if (x < 1)
         {
             DataTransfer.tapJudgeList.Remove(this);
-            DataTransfer.controller.JudgeNote(nowTime);
             DataTransfer.controller.GenerateEffect(nowTime, transform.position.x);
+            DataTransfer.controller.JudgeScore(nowTime, 1);
             Destroy(gameObject);
             return true;
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,7 +17,7 @@ public class TouchScript : MonoBehaviour
     {
         ClearTouchData();
         GetTouchData();
-        //MouseInputDebug();
+        MouseInputDebug();
         ShowTouchPosition();
         JudgeNote();
     }
@@ -24,9 +25,9 @@ public class TouchScript : MonoBehaviour
     void ClearTouchData()
     {
         lastTouch.Clear();//清空旧数据
-        foreach (float a in lastTouch)
+        foreach (float a in touch)
         {
-            touch.Add(a);//保存上一次点击数据
+            lastTouch.Add(a);//保存上一次点击数据
         }
         touch.Clear();//清空旧数据
         tap.Clear();//清空旧数据
@@ -82,7 +83,7 @@ public class TouchScript : MonoBehaviour
     {
         for (int i = 0; i < touch.Count; i++)//遍历手指触摸
         {
-            if (i == touchLine.Count)//创建新线
+            if (i == touchLine.Count)//创建新线 创建新线后 touch.Count也会增加，保证不动原本的线
             {
                 GameObject lineObj = Instantiate(line, new Vector3(0, 0, 7), Quaternion.identity);
                 touchLine.Add(lineObj);
@@ -91,69 +92,46 @@ public class TouchScript : MonoBehaviour
             transPosition.x = touch[i];//根据手指触点设置坐标
             touchLine[i].transform.position = transPosition;//设置坐标
         }
-        for (int i = touch.Count; i < touchLine.Count;)//生成了线才销毁线
+        for (int i = touch.Count; i < touchLine.Count;)//手指离开才销毁
         {
             Destroy(touchLine[i]);
             touchLine.RemoveAt(i);
         }
     }
 
+    void JudgeList(List<float> pointList, Func<float, bool> judgeFunction)
+    {
+        for (int n = 0; n < pointList.Count; n++)
+        {
+            if (judgeFunction(pointList[n]))
+            {
+                pointList.RemoveAt(n);
+                break;
+            }
+        }
+    }
+
     void JudgeNote()
     {
-        //按不同的音符类型分别进行判别
-        for (int i = 0; i < DataTransfer.tapJudgeList.Count; i++)
+        for (int i = DataTransfer.tapJudgeList.Count - 1; i >= 0; i--)
         {
-            for (int j = 0; j < tap.Count; j++)
-            {                
-                if (DataTransfer.tapJudgeList[i].Judge(tap[j]))
-                {
-                    tap.RemoveAt(j);
-                }
-                
-            }
+            JudgeList(tap, DataTransfer.tapJudgeList[i].Judge);
         }
-        for (int i = 0; i < DataTransfer.flickJudgeList.Count; i++)
+        for (int i = DataTransfer.flickJudgeList.Count - 1; i >= 0; i--)
         {
-            for (int j = 0; j < flick.Count; j++)
-            {
-                if (DataTransfer.flickJudgeList[i].Judge(flick[j]))
-                {
-                    flick.RemoveAt(j);
-                }
-
-            }
+            JudgeList(flick, DataTransfer.flickJudgeList[i].Judge);
         }
-        for (int i = 0; i < DataTransfer.dragJudgeList.Count; i++)
+        for (int i = DataTransfer.dragJudgeList.Count - 1; i >= 0; i--)
         {
-            for (int j = 0; j < touch.Count; j++)
-            {
-                if (DataTransfer.dragJudgeList[i].Judge(touch[j]))
-                {
-                    touch.RemoveAt(j);
-                }
-
-            }
+            JudgeList(touch, DataTransfer.dragJudgeList[i].Judge);
         }
-        for (int i = 0; i < DataTransfer.holdHeadJudge.Count; i++)
+        for (int i = DataTransfer.holdHeadJudge.Count - 1; i >= 0; i--)
         {
-            for (int j = 0; j < tap.Count; j++)
-            {
-                if (DataTransfer.holdHeadJudge[i].HeadJudge(tap[j]))
-                {
-                    tap.RemoveAt(j);
-                }               
-                
-            }
+            JudgeList(tap, DataTransfer.holdHeadJudge[i].HeadJudge);
         }
-        for (int i = 0; i < DataTransfer.holdingJudgeList.Count; i++)
+        for (int i = DataTransfer.holdingJudgeList.Count - 1; i >= 0; i--)
         {
-            for (int j = 0; j < touch.Count; j++)
-            {
-                if (DataTransfer.holdingJudgeList[i].HoldingJudge(touch[j]))
-                {
-                    touch.RemoveAt(j);
-                }
-            }
+            JudgeList(touch, DataTransfer.holdingJudgeList[i].HoldingJudge);
         }
     }
 }

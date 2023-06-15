@@ -3,7 +3,10 @@ guid: 1b9a6a669645014468a435aa1dbb5607
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - start: {instanceID: 0}
+  - quit: {instanceID: 0}
+  - panelPrefab: {fileID: 6578890527872469910, guid: 080fc77f492da07448e22fc93ba17653, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

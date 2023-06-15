@@ -14,20 +14,20 @@ public class HoldScript : MonoBehaviour
     {
         mySprite = gameObject.GetComponentInChildren<SpriteRenderer>();
         holdTime = DataTransfer.holdTime;
-        transform.localScale = new Vector3(1, 1, 7.5f * holdTime);
+        transform.localScale = new Vector3(1, 1, 7.5f * holdTime * DataTransfer.speedScale);
         transform.Translate(0, 0, 7.5f * holdTime);
     }
 
     void Update()
     {
-        nowTime += DataTransfer.myDeltaTime;
-        transform.Translate(0, 0, -15 * DataTransfer.myDeltaTime * DataTransfer.speedScale);
-        if (addFlag && nowTime > -0.08f)
+        nowTime += DataTransfer.deltaTime;
+        transform.Translate(0, 0, -15 * DataTransfer.deltaTime * DataTransfer.speedScale);
+        if (addFlag && nowTime > -0.12f)
         {
             DataTransfer.holdHeadJudge.Add(this);//加入判定列表
             addFlag = false;
         }
-        else if (removeFlag && nowTime > 0.08f)
+        else if (removeFlag && nowTime > 0.12f)
         {
             DataTransfer.holdHeadJudge.Remove(this);//移出判定列表
             removeFlag = false;
@@ -64,30 +64,30 @@ public class HoldScript : MonoBehaviour
 
     IEnumerator HoldingTimer()
     {
-        float cd = 0.31f;
+        float effectCd = 0.31f;//长条的特效的cd
         while (holdingFlag)
         {
-            holdingTime += DataTransfer.myDeltaTime;           
-            if(cd > 0.3f)
+            holdingTime += DataTransfer.deltaTime;           
+            if(effectCd > 0.3f)
             {
                 DataTransfer.controller.GenerateHoldingEffect(hitTime, transform.position.x);
-                cd -= 0.3f;
+                effectCd -= 0.3f;
             }
-            cd += Time.deltaTime;
+            effectCd += Time.deltaTime;
             holdingFlag = false;
-            transform.localScale = new Vector3(1, 1, 7.5f * (holdTime - holdingTime) / DataTransfer.speedScale);
-            transform.Translate(0, 0, 7.5f * DataTransfer.myDeltaTime * DataTransfer.speedScale);
-            if(holdingTime > holdTime)
+            transform.localScale = new Vector3(1, 1, 7.5f * (holdTime - holdingTime) * DataTransfer.speedScale);
+            transform.Translate(0, 0, 7.5f * DataTransfer.deltaTime);
+            if(holdingTime >= holdTime - 0.05f)
             {
                 DataTransfer.holdingJudgeList.Remove(this);
-                DataTransfer.controller.JudgeNote(hitTime);
-                DataTransfer.controller.GenerateEffect(hitTime, transform.position.x);                
+                DataTransfer.controller.GenerateEffect(hitTime, transform.position.x);  
+                DataTransfer.controller.JudgeScore(hitTime, 4);              
                 Destroy(gameObject, holdTime);
                 break;
             }
             yield return 0;
         }
-        if(holdingTime < holdTime)
+        if(holdingTime < holdTime - 0.05f)
         {
             Miss();
         }
