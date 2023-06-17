@@ -12,12 +12,12 @@ public class FlickScript : MonoBehaviour
     {
         nowTime += DataTransfer.deltaTime;
         transform.Translate(0, 0, -15 * DataTransfer.deltaTime * DataTransfer.speedScale);
-        if (addFlag && nowTime > -0.12f)
+        if (addFlag && nowTime > -0.08f)
         {
             DataTransfer.flickJudgeList.Add(this);//加入判定列表
             addFlag = false;
         }
-        else if (removeFlag && nowTime > 0.12f)
+        else if (removeFlag && nowTime > 0.08f)
         {
             DataTransfer.flickJudgeList.Remove(this);//移出判定列表
             removeFlag = false;

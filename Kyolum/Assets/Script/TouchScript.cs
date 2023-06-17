@@ -17,7 +17,7 @@ public class TouchScript : MonoBehaviour
     {
         ClearTouchData();
         GetTouchData();
-        MouseInputDebug();
+        //MouseInputDebug();
         ShowTouchPosition();
         JudgeNote();
     }
@@ -99,7 +99,7 @@ public class TouchScript : MonoBehaviour
         }
     }
 
-    void JudgeList(List<float> pointList, Func<float, bool> judgeFunction)
+    void JudgeListAndRemove(List<float> pointList, Func<float, bool> judgeFunction)
     {
         for (int n = 0; n < pointList.Count; n++)
         {
@@ -111,15 +111,27 @@ public class TouchScript : MonoBehaviour
         }
     }
 
+    void JudgeList(List<float> pointList, Func<float, bool> judgeFunction)
+    {
+        for (int n = 0; n < pointList.Count; n++)
+        {
+            if (judgeFunction(pointList[n]))
+            {
+                //pointList.RemoveAt(n);
+                break;
+            }
+        }
+    }
+
     void JudgeNote()
     {
         for (int i = DataTransfer.tapJudgeList.Count - 1; i >= 0; i--)
         {
-            JudgeList(tap, DataTransfer.tapJudgeList[i].Judge);
+            JudgeListAndRemove(tap, DataTransfer.tapJudgeList[i].Judge);
         }
         for (int i = DataTransfer.flickJudgeList.Count - 1; i >= 0; i--)
         {
-            JudgeList(flick, DataTransfer.flickJudgeList[i].Judge);
+            JudgeListAndRemove(flick, DataTransfer.flickJudgeList[i].Judge);
         }
         for (int i = DataTransfer.dragJudgeList.Count - 1; i >= 0; i--)
         {
@@ -127,7 +139,7 @@ public class TouchScript : MonoBehaviour
         }
         for (int i = DataTransfer.holdHeadJudge.Count - 1; i >= 0; i--)
         {
-            JudgeList(tap, DataTransfer.holdHeadJudge[i].HeadJudge);
+            JudgeListAndRemove(tap, DataTransfer.holdHeadJudge[i].HeadJudge);
         }
         for (int i = DataTransfer.holdingJudgeList.Count - 1; i >= 0; i--)
         {

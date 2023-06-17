@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
     public AudioSource musicPlayer;
+    public VideoPlayer videoPlayer;
     public TextAsset chart;
     public GameObject tap, flick, drag, hold;
     public GameObject perfectEffect, greatEffect;
@@ -34,6 +36,8 @@ public class GameController : MonoBehaviour
         //DataTransfer.comboNum = 0;
         hitCount.gameObject.SetActive(false);
         musicPlayer.Pause();//先设定暂停音乐 倒计时结束后再播放
+        //videoPlayer.Pause();
+        videoPlayer.Play();
         StartCoroutine("GameStart");
         LoadChart();//加载谱
         isPlaying = true;
@@ -94,6 +98,7 @@ public class GameController : MonoBehaviour
     IEnumerator GameStart()
     {
         yield return new WaitForSeconds(2);//等待2秒
+        //videoPlayer.Play();
         musicPlayer.Play();//播放音乐
         gameStart = true;//置游戏开始为真
     }
@@ -120,7 +125,7 @@ public class GameController : MonoBehaviour
             for(int n = 0; n < notePart.Length; n++)
             {
                 string[] noteData = notePart[n].Split(',');//分割每个描述
-                if(noteData.Length == 2)//根据描述判定不同音符类型
+                if(noteData.Length == 2)//根据描述保存不同音符类型
                 {
                     noteType.Add(Convert.ToSingle(noteData[0]));
                     notePosition.Add(Convert.ToSingle(noteData[1]));
@@ -215,6 +220,7 @@ public class GameController : MonoBehaviour
         gameStart = false;
         isPlaying = false;
         musicPlayer.Pause();
+        videoPlayer.Pause();
         pause.gameObject.SetActive(false);
         pauseBackGround.SetActive(true);
         DataTransfer.deltaTime = 0;
@@ -225,6 +231,7 @@ public class GameController : MonoBehaviour
         gameStart = true;
         isPlaying = true;
         musicPlayer.Play();
+        videoPlayer.Play();
         pause.gameObject.SetActive(true);
         pauseBackGround.SetActive(false);
     }
@@ -234,6 +241,7 @@ public class GameController : MonoBehaviour
         gameStart = false;
         isPlaying = false;
         musicPlayer.Pause();
+        videoPlayer.Pause();
         //pause.gameObject.SetActive(false);
         gameEndBackground.SetActive(true);
         int s = Convert.ToInt32(1000000 * (nowScore / totalScore));

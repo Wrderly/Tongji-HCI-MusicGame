@@ -10,7 +10,7 @@ public class DataTransfer : MonoBehaviour
     static public GameController controller;
     static public float speedScale = 1.0f;
     static public bool transitAble = false;
-    static public int TAP = 1;
+    //static public int TAP = 1;
 
     static public List<TapScript> tapJudgeList = new List<TapScript>();
     static public List<FlickScript> flickJudgeList = new List<FlickScript>();
