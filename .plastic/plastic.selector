@@ -1,0 +1,4 @@
+repository "Kyolum@wrderly@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"
